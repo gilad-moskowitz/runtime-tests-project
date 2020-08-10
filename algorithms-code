@@ -1,0 +1,478 @@
+import math
+import time
+import pandas as pd
+
+
+
+def LengthSetsUpToElement(S, nmax):
+    start = time.time()
+    lengthsets = {}
+    lengthsets[0] = [0]
+    for n in [1 .. nmax]:
+        if n in lengthsets:
+            continue
+        lengthsets[n] = []
+        for i in range(len(S)):
+            if n - S[i] < 0:
+                continue
+            lengthsets[n] += [l + 1 for l in lengthsets[n - S[i]]]
+        lengthsets[n] = sorted(list(Set(lengthsets[n])))
+    runtime = time.time() - start
+    print runtime
+    return lengthsets
+    
+
+
+def LengthSet(S, q):
+    start = time.time()
+    lengthsets = {}
+    lengthsets[0] = [0]
+    for n in [1 .. q+1]:
+        if n in lengthsets:
+            continue
+        lengthsets[n] = []
+        for i in range(len(S)):
+            if n - S[i] < 0:
+                continue
+            lengthsets[n] += [l + 1 for l in lengthsets[n - S[i]]]
+        lengthsets[n] = sorted(list(Set(lengthsets[n])))
+    runtime = time.time() - start
+    print runtime
+    return lengthsets[n]
+
+
+
+def FactorizationsUpToElement(S, nmax):
+    start = time.time()
+    F = {}
+    p = [0]*len(S)
+    F[0] = []
+    F[0].append(p)
+    for n in [1 .. nmax]:
+        F[n] = set([])
+        for i in range(len(S)):
+            if n - S[i] < 0:
+                continue
+            for a in F[n - S[i]]:
+                s = list(a)
+                s[i] += 1
+                s = tuple(s)
+                if s not in F[n]:
+                    F[n] = F[n].union(set([s]))
+    runtime = time.time() - start
+    print runtime
+    return F
+
+
+
+def BadBruteForceFact(S, nmax):
+    start = time.time()
+    F = {}
+    p = [0]*len(S)
+    F[0] = []
+    F[0].append(p)
+    for n in [1 .. nmax]:
+        F[n] = []
+        M = []
+        for i in range(len(S)):
+            M.append(floor(n/S[i]))
+        N = [0]*len(M)
+        while(N != M):
+            for i in range(1, len(M)):
+                if(N[len(M)-i] == M[len(M)-i]):
+                    N[len(M)-i] = 0
+                    if(N[len(M) - (i+1)] != M[len(M) - (i+1)]):
+                        N[len(M) - (i+1)] += 1
+                        break
+                else:
+                    N[len(M)-i] += 1
+                    break
+            a = 0
+            for l in range(len(N)):
+                a += N[l]*S[l]
+            if a == n:
+                F[n].append(N[:])
+    runtime = time.time() - start
+    print runtime
+    return F
+
+
+
+def BetterBruteForceFact(S, nmax):
+    start = time.time()
+    F = {}
+    p = [0]*len(S)
+    F[0] = []
+    F[0].append(p)
+    for n in [1 .. nmax]:
+        F[n] = []
+        M = []
+        for i in range(len(S)):
+            if i == 0:
+                M.append(0)
+            else:
+                M.append(floor(n/S[i]))
+        N = [0]*len(M)
+        if n%S[0] == 0:
+            A = N[:]
+            A[0] = n/S[0]
+            F[n].append(A)
+        while(N != M):
+            for i in range(1, len(M)):
+                if(N[len(M)-i] == M[len(M)-i]):
+                    N[len(M)-i] = 0
+                    if(N[len(M) - (i+1)] != M[len(M) - (i+1)]):
+                        N[len(M) - (i+1)] += 1
+                        break
+                else:
+                    N[len(M)-i] += 1
+                    break
+            a = 0
+            for l in range(len(N)):
+                a += N[l]*S[l]
+            if ((n - a)%S[0] == 0 and (n - a) >= 0):
+                A = N[:]
+                A[0] = (n - a)/S[0]
+                F[n].append(A)
+    runtime = time.time() - start
+    print runtime
+    return F
+
+
+
+def BadBruteForceFactOne(S, n):
+    start = time.time()
+    F = []
+    M = []
+    for i in range(len(S)):
+        M.append(floor(n/S[i]))
+    N = [0]*len(M)
+    while(N != M):
+        for i in range(1, len(M)):
+            if(N[len(M)-i] == M[len(M)-i]):
+                N[len(M)-i] = 0
+                if(N[len(M) - (i+1)] != M[len(M) - (i+1)]):
+                    N[len(M) - (i+1)] += 1
+                    break
+            else:
+                N[len(M)-i] += 1
+                break
+        a = 0
+        for l in range(len(N)):
+            a += N[l]*S[l]
+        if a == n:
+            F.append(N[:])
+    runtime = time.time() - start
+    print runtime
+    return F
+
+
+
+def BetterBruteForceFactOne(S, n):
+    start = time.time()
+    F = []
+    M = []
+    for i in range(len(S)):
+        if i == 0:
+            M.append(0)
+        else:
+            M.append(floor(n/S[i]))
+    N = [0]*len(M)
+    if n%S[0] == 0:
+        A = N[:]
+        A[0] = n/S[0]
+        F.append(A)
+    while(N != M):
+        for i in range(1, len(M)):
+            if(N[len(M)-i] == M[len(M)-i]):
+                N[len(M)-i] = 0
+                if(N[len(M) - (i+1)] != M[len(M) - (i+1)]):
+                    N[len(M) - (i+1)] += 1
+                    break
+            else:
+                N[len(M)-i] += 1
+                break
+        a = 0
+        for l in range(len(N)):
+            a += N[l]*S[l]
+        if ((n - a)%S[0] == 0 and (n - a) >= 0):
+            A = N[:]
+            A[0] = (n - a)/S[0]
+            F.append(A)
+    runtime = time.time() - start
+    print runtime
+    return F
+
+
+
+def BadBruteForceLen(S, nmax):
+    start = time.time()
+    F = {}
+    p = 0
+    F[0] = []
+    F[0].append(p)
+    for n in [1 .. nmax]:
+        F[n] = []
+        M = []
+        for i in range(len(S)):
+            M.append(floor(n/S[i]))
+        N = [0]*len(M)
+        while(N != M):
+            for i in range(1, len(M)):
+                if(N[len(M)-i] == M[len(M)-i]):
+                    N[len(M)-i] = 0
+                    if(N[len(M) - (i+1)] != M[len(M) - (i+1)]):
+                        N[len(M) - (i+1)] += 1
+                        break
+                else:
+                    N[len(M)-i] += 1
+                    break
+            a = 0
+            for l in range(len(N)):
+                a += N[l]*S[l]
+            if a == n:
+                b = 0
+                for i in N:
+                    b += i
+                F[n].append(b)
+        F[n] = sorted(list(set((F[n]))))
+    runtime = time.time() - start
+    print runtime
+    return F
+
+
+
+def BetterBruteForceLen(S, nmax):
+    start = time.time()
+    F = {}
+    p = 0
+    F[0] = []
+    F[0].append(p)
+    for n in [1 .. nmax]:
+        F[n] = []
+        M = []
+        for i in range(len(S)):
+            if i == 0:
+                M.append(0)
+            else:
+                M.append(floor(n/S[i]))
+        N = [0]*len(M)
+        if n%S[0] == 0:
+            F[n].append(n/S[0])
+        while(N != M):
+            for i in range(1, len(M)):
+                if(N[len(M)-i] == M[len(M)-i]):
+                    N[len(M)-i] = 0
+                    if(N[len(M) - (i+1)] != M[len(M) - (i+1)]):
+                        N[len(M) - (i+1)] += 1
+                        break
+                else:
+                    N[len(M)-i] += 1
+                    break
+            a = 0
+            for l in range(len(N)):
+                a += N[l]*S[l]
+            if ((n - a)%S[0] == 0 and (n - a) >= 0):
+                A = N[:]
+                A[0] = (n - a)/S[0]
+                b = 0
+                for i in A:
+                    b += i
+                F[n].append(b)
+        F[n] = sorted(list(set((F[n]))))
+    runtime = time.time() - start
+    print runtime
+    return F
+
+
+
+def BadBruteForceLenOne(S, n):
+    start = time.time()
+    F = []
+    M = []
+    for i in range(len(S)):
+        M.append(floor(n/S[i]))
+    N = [0]*len(M)
+    while(N != M):
+        for i in range(1, len(M)):
+            if(N[len(M)-i] == M[len(M)-i]):
+                N[len(M)-i] = 0
+                if(N[len(M) - (i+1)] != M[len(M) - (i+1)]):
+                    N[len(M) - (i+1)] += 1
+                    break
+            else:
+                N[len(M)-i] += 1
+                break
+        a = 0
+        for l in range(len(N)):
+            a += N[l]*S[l]
+        if a == n:
+            b = 0
+            for i in N:
+                b += i
+            F.append(b)
+    F = sorted(list(set((F))))
+    runtime = time.time() - start
+    print runtime
+    return F
+    
+
+
+def BetterBruteForceLenOne(S, n):
+    start = time.time()
+    F = []
+    M = []
+    for i in range(len(S)):
+        if i == 0:
+            M.append(0)
+        else:
+            M.append(floor(n/S[i]))
+    N = [0]*len(M)
+    if n%S[0] == 0:
+        F.append(n/S[0])
+    while(N != M):
+        for i in range(1, len(M)):
+            if(N[len(M)-i] == M[len(M)-i]):
+                N[len(M)-i] = 0
+                if(N[len(M) - (i+1)] != M[len(M) - (i+1)]):
+                    N[len(M) - (i+1)] += 1
+                    break
+            else:
+                N[len(M)-i] += 1
+                break
+        a = 0
+        for l in range(len(N)):
+            a += N[l]*S[l]
+        if ((n - a)%S[0] == 0 and (n - a) >= 0):
+            A = N[:]
+            A[0] = (n - a)/S[0]
+            b = 0
+            for i in A:
+                b += i
+            F.append(b)
+    F = sorted(list(set((F))))
+    runtime = time.time() - start
+    print runtime
+    return F
+
+
+
+def BadBruteForceLenOpt(S, nmax):
+    start = time.time()
+    F = {}
+    p = 0
+    F[0] = []
+    F[0].append(p)
+    for n in [1 .. nmax]:
+        F[n] = []
+        M = []
+        for i in range(len(S)):
+            M.append(floor(n/S[i]))
+        N = [0]*len(M)
+        r = floor(n/max(S))
+        q = floor(n/min(S))
+        D = {}
+        for j in [r..q]:
+            D[j] = False
+        while(N != M):
+            for i in range(1, len(M)):
+                if(N[len(M)-i] == M[len(M)-i]):
+                    N[len(M)-i] = 0
+                    if(N[len(M) - (i+1)] != M[len(M) - (i+1)]):
+                        N[len(M) - (i+1)] += 1
+                        break
+                else:
+                    N[len(M)-i] += 1
+                    break
+            a = 0
+            for l in range(len(N)):
+                a += N[l]*S[l]
+            if a == n:
+                b = 0
+                for i in N:
+                    b += i
+                D[b] = True
+        for j in [r..q]:
+            if D[j]:
+                F[n].append(j)
+    runtime = time.time() - start
+    print runtime
+    return F
+
+
+
+def BetterBruteForceLenOpt(S, nmax):
+    start = time.time()
+    F = {}
+    D = {}
+    p = 0
+    F[0] = []
+    F[0].append(p)
+    for n in [1 .. nmax]:
+        r = floor(n/max(S))
+        q = floor(n/min(S))
+        D = {}
+        for j in [r..q]:
+            D[j] = False
+        F[n] = []
+        M = []
+        for i in range(len(S)):
+            if i == 0:
+                M.append(0)
+            else:
+                M.append(floor(n/S[i]))
+        N = [0]*len(M)
+        if n%S[0] == 0:
+            D[n/S[0]] = True
+        while(N != M):
+            for i in range(1, len(M)):
+                if(N[len(M)-i] == M[len(M)-i]):
+                    N[len(M)-i] = 0
+                    if(N[len(M) - (i+1)] != M[len(M) - (i+1)]):
+                        N[len(M) - (i+1)] += 1
+                        break
+                else:
+                    N[len(M)-i] += 1
+                    break
+            a = 0
+            for l in range(len(N)):
+                a += N[l]*S[l]
+            if ((n - a)%S[0] == 0 and (n - a) >= 0):
+                A = N[:]
+                A[0] = (n - a)/S[0]
+                b = 0
+                for i in A:
+                    b += i
+                D[b] = True
+        for j in [r..q]:
+            if D[j]:
+                F[n].append(j)
+    runtime = time.time() - start
+    print runtime
+    return F
+
+
+
+
+def FactorizationsOf(S, q):
+    start = time.time()
+    F = {}
+    p = [0]*len(S)
+    F[0] = []
+    F[0].append(p)
+    for n in [1 .. q+1]:
+        if n in F:
+            continue
+        F[n] = []
+        for i in range(len(S)):
+            if n - S[i] < 0:
+                continue
+            for a in F[n - S[i]]:
+                s = a[:]
+                s[i] += 1
+                if s not in F[n]:
+                    F[n].append(s)
+    runtime = time.time() - start
+    print runtime
+    return F[q]
+
